@@ -87,8 +87,10 @@
 }
 .postBottom {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  /* align-items: center;
+  justify-content: space-between; */
 }
 
 .postBottomLeft {
@@ -106,6 +108,9 @@
   font-size: 15px;
 }
 
+.postBottomRight {
+  width: 100%;
+}
 .postCommentText {
   font-size: 15px;
   cursor: pointer;

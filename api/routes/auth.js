@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+
 //register
 router.post("/register", async (req, res) => {
   try {
@@ -41,6 +42,17 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     return res.status(500).json(err);
   }
+});
+
+// Logout route
+router.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Error logging out" });
+    }
+    // Redirect or send a success response
+    res.status(200).json({ message: "Logout successful" });
+  });
 });
 
 module.exports = router;

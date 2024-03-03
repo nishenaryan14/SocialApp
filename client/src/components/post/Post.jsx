@@ -18,6 +18,7 @@ import { useTheme } from "@mui/material/styles";
 import { Heart } from "../animatedSvg/heart/Heart";
 import EmojiPicker from "emoji-picker-react";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
+import { Comments } from "../comments/Comments";
 
 export default function Post({
   post,
@@ -47,11 +48,12 @@ export default function Post({
     setLike(isLiked ? like - 1 : like + 1);
     setIsLiked(!isLiked);
   };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`/users?userId=${post.userId}`);
-        console.log(res);
+        // console.log(res);
         setUser(res.data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -215,7 +217,8 @@ export default function Post({
               <span className="postLikeCounter">{like} people loved it</span>
             </div>
             <div className="postBottomRight">
-              <span className="postCommentText">{post.comment} comments</span>
+              <Comments post={post} user={user} />
+              {/* <span className="postCommentText">{post.comment} comments</span> */}
             </div>
           </div>
         </div>

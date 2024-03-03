@@ -3,8 +3,8 @@ import { motion, useAnimation } from "framer-motion";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import { IoHomeOutline } from "react-icons/io5";
 import { PiChats } from "react-icons/pi";
-import { BsChatSquareDots } from "react-icons/bs";
-import { GrTransaction } from "react-icons/gr";
+import { IoPlayCircleOutline } from "react-icons/io5";
+import { CiBookmark } from "react-icons/ci";
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosHelpCircleOutline } from "react-icons/io";
 import AnimatedCross from "../side_navbar/AnimatedCross";
@@ -12,13 +12,17 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { useTheme } from "../../context/ColorContext";
+import { logoutCall } from "../../apiCalls";
+
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { theme, setTheme } = useTheme();
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const [selected, setSelected] = useState(() => {
     const storedSelected = sessionStorage.getItem("selectedItem");
-    return storedSelected || null;
+    return storedSelected || "Home";
   });
 
   const highlightedContentRef = useRef(null);
@@ -86,24 +90,26 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     },
     {
       id: 3,
-      itemName: "Notification",
-      path: "notification",
-      itemImg: BsChatSquareDots,
+      itemName: "Bookmarks",
+      path: "bookmarks",
+      itemImg: CiBookmark,
     },
     {
       id: 4,
-      itemName: "Transaction History",
-      path: "transaction-history",
-      itemImg: GrTransaction,
+      itemName: "Videos",
+      path: "videos",
+      itemImg: IoPlayCircleOutline,
     },
     {
       id: 5,
       itemName: "Settings",
+      path: "setting",
       itemImg: IoSettingsOutline,
     },
     {
       id: 6,
       itemName: "Help",
+      path: "help",
       itemImg: IoIosHelpCircleOutline,
     },
   ];
@@ -111,6 +117,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const handleSelect = (item) => {
     setSelected(item.itemName);
     navigate(item.path);
+  };
+  const handleClick = async (e) => {
+    try {
+      await logoutCall();
+      // After successful logout, you may want to redirect the user to the login page or perform any other necessary actions.
+      navigate("/login"); // Example: Redirect to login page
+    } catch (error) {
+      console.error("Error logging out:", error);
+      // Handle logout error
+    }
   };
 
   return (
@@ -127,9 +143,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
           />
         )}
       </div>
-      <div className="sidebarParent">
+      <div className={`sidebarParent ${theme && "light"} `}>
+        <div className="sidebarLogo">
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <span className={`logo  ${theme && "dark"} `}>
+              {isSidebarOpen ? "Gosocial" : "Go"}
+            </span>
+          </Link>
+        </div>
         <motion.div
-          className="sidebarMain"
+          className={`sidebarMain `}
           variants={sidebarVariants}
           initial={false}
           animate={controls}
@@ -158,7 +181,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
               </motion.p>
             </motion.li>
           ))}
-          <motion.div
+
+          {/* <motion.div
             variants={listItemIconVariants}
             className={`userDiv ${!isSidebarOpen && "collapsedUserDiv"}`}
           >
@@ -181,8 +205,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 <p className="userEmailInfo">bruce@gmail.com</p>
               </div>
             )}
-            <LogoutIcon />
-          </motion.div>
+            <LogoutIcon onClick={handleClick} />
+          </motion.div> */}
         </motion.div>
       </div>
     </>

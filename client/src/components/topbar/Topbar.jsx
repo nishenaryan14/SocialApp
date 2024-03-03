@@ -3,49 +3,55 @@ import "./topbar.css";
 import { Search, Person, Chat, Notifications } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { MdDarkMode } from "react-icons/md";
+import { CiLight } from "react-icons/ci";
 import axios from "axios";
+import { useTheme } from "../../context/ColorContext";
 
 const Topbar = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { theme, setTheme } = useTheme();
+  const [search, setSearch] = useState("");
   const searchRef = useRef(null);
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      handleSubmit();
+
+  const handleSearch = async () => {
+    const username = searchRef.current.value.trim();
+    if (!username) {
+      return;
+    }
+    setSearch(username);
+    try {
+      const userData = await getUser(username);
+      if (userData) {
+        navigate(`/profile/${username}`);
+      } else {
+        // Handle user not found
+        console.log("User not found");
+      }
+    } catch (error) {
+      // Handle API error
+      console.error("Error fetching user data:", error);
     }
   };
-  const handleSubmit = () => {
-    // const data = getUser(searchRef.current.value);
-    const username = searchRef.current.value;
-    navigate(`profile/${username}`);
-  };
 
-  const getUser = async (username, userId) => {
+  const getUser = async (username) => {
     try {
-      let response;
-      if (userId) {
-        response = await axios.get(`/users/`, { params: { userId } });
-      } else if (username) {
-        // setUsername(username);
-        response = await axios.get(`/users/`, { params: { username } });
-      } else {
-        console.error("Neither username nor userId provided.");
-        return;
-      }
-      console.log(response.data);
+      const response = await axios.get(`/users/`, { params: { username } });
       return response.data;
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   };
 
   return (
-    <div className="topbarContainer">
+    <div className={`topbarContainer ${theme && "light"}`}>
       <div className="topbarLeft">
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <span className="logo">Gosocial</span>
-        </Link>
+        <div className="topbarLinks">
+          <span className="topbarLink">Home</span>
+          <span className="topbarLink">Timeline</span>
+        </div>
       </div>
       <div className="topbarCenter">
         <div className="searchbar">
@@ -56,18 +62,18 @@ const Topbar = () => {
             name="searchInput"
             placeholder="Search for friend, post, or video"
             className="searchInput"
-            onKeyPress={handleKeyPress}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleSearch();
+              }
+            }}
           />
-          <span onClick={handleSubmit} className="search">
+          <span onClick={handleSearch} className="search">
             Search
           </span>
         </div>
       </div>
       <div className="topbarRight">
-        <div className="topbarLinks">
-          <span className="topbarLink">Home</span>
-          <span className="topbarLink">Timeline</span>
-        </div>
         <div className="topbarIcons">
           <div className="topbarIconItem">
             <Person />
@@ -82,6 +88,10 @@ const Topbar = () => {
             <span className="topbarIconBadge">1</span>
           </div>
         </div>
+
+        <button className="toggle" onClick={() => setTheme(!theme)}>
+          {theme ? <MdDarkMode /> : <CiLight />}
+        </button>
         <Link to={`/profile/${user.username}`}>
           <img
             src={
