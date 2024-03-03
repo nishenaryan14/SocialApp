@@ -32,7 +32,8 @@
 }
 
 .loginBox {
-  height: 400px;
+  min-height: 400px;
+  height: max-content;
   padding: 20px;
   background-color: white;
   border-radius: 10px;
@@ -72,6 +73,7 @@
 }
 
 .loginRegisterButton {
-  width: 100%;
+  width: max-content m !important;
+  padding: 5px;
   background-color: #42b72a;
 }

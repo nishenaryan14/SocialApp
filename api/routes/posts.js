@@ -39,7 +39,7 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//like dislike post
+//like unlike post
 
 router.put("/:id/like", async (req, res) => {
   try {
@@ -55,6 +55,73 @@ router.put("/:id/like", async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+//comments route
+router.get("/:id/comment", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.status(200).json(post.comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ message: "Error fetching comments" });
+  }
+});
+
+router.post("/:id/comment", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    const newComment = {
+      userId: req.body.userId,
+      content: req.body.content,
+    };
+    post.comments.push(newComment);
+    await post.save();
+    return res.status(201).json(post.comments); // Use 201 status code for resource creation
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ message: "Error adding comment" });
+  }
+});
+
+router.put("/:id/comment/like", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const { _id, userId } = req.body; // Assuming the request body contains both commentId and userId
+
+    const comment = post.comments.find(
+      (comment) => comment._id.toString() === _id
+    );
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const likedIndex = comment.likes.indexOf(userId);
+    if (likedIndex === -1) {
+      // If not liked already, add user ID to likes array
+      comment.likes.push(userId);
+    } else {
+      // If already liked, remove user ID from likes array
+      comment.likes.splice(likedIndex, 1);
+    }
+
+    await post.save();
+    res.status(200).json({ message: "Like status updated successfully" });
+  } catch (error) {
+    console.error("Error updating like status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 //get a post
 
 router.get("/:id", async (req, res) => {

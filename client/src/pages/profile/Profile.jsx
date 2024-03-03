@@ -1,16 +1,24 @@
 import "./profile.css";
 import Topbar from "../../components/topbar/Topbar";
-import Sidebar from "../../components/sidebar/Sidebar";
+import Sidebar from "../../components/side_navbar/Sidebar";
 import Feed from "../../components/feed/Feed";
 import Rightbar from "../../components/rightbar/Rightbar";
+import { FaUserEdit } from "react-icons/fa";
+import { MdModeEditOutline } from "react-icons/md";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router";
+import { AuthContext } from "../../context/AuthContext";
+
 export default function Profile() {
   const PublicFolder = process.env.REACT_APP_PUBLIC_FOLDER;
   const [user, setUser] = useState({});
-  const [userData, setUserData] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(""); // Store selected profile picture
   const username = useParams().username;
+  const imgRef = useRef(null);
+  const { user: currentUser } = useContext(AuthContext);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -23,15 +31,45 @@ export default function Profile() {
     };
     fetchUser();
   }, [username]);
-  const updateDetails = async (userId, userData) => {
-    const response = await axios.put(`users/${userId}`, userData);
-    console.log(response);
+
+  const handleClick = () => {
+    setIsEditing(!isEditing);
   };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setProfilePicture(file);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const requestData = {
+        userId: currentUser._id,
+        profilePicture: profilePicture,
+      };
+      const response = await axios.put(`/users/${user._id}`, requestData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // Update user data or perform any necessary action upon successful upload
+      console.log("Profile picture updated:", response.data);
+      setProfilePicture(null);
+      setIsEditing(false);
+
+      // Upload the selected profile picture
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+    }
+  };
+
   return (
     <>
-      <Topbar />
       <div className="profile">
-        <Sidebar />
+        <div className="editOption" onClick={handleClick}>
+          {!isEditing ? <FaUserEdit /> : <p onClick={handleSubmit}>Save</p>}
+        </div>
         <div className="profileRight">
           <img
             className="profileCoverImg"
@@ -53,6 +91,20 @@ export default function Profile() {
                 }
                 alt=""
               />
+              {isEditing && (
+                <>
+                  <label className="editBtn" htmlFor="imgUpload">
+                    <MdModeEditOutline />
+                  </label>
+                  <input
+                    type="file"
+                    id="imgUpload"
+                    ref={imgRef}
+                    style={{ display: "none" }}
+                    onChange={handleFileChange} // Handle file change event
+                  />
+                </>
+              )}
             </div>
             <div className="profileInfo">
               <h4 className="profileInfoName">{user.username}</h4>
