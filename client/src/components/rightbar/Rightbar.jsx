@@ -1,31 +1,40 @@
 import "./rightbar.css";
-import { Users } from "../../dummyData";
 import Online from "../online/Online";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { Add, Remove } from "@mui/icons-material";
+import { ads } from "../../dummyData";
+import { Users } from "../../dummyData";
 export default function Rightbar({ user }) {
   const onlineFriends = Users.filter((friend) => friend.id !== 1);
   const PublicFolder = process.env.REACT_APP_PUBLIC_FOLDER;
   const [friends, setFriends] = useState([]);
   const { user: currentUser, dispatch } = useContext(AuthContext);
   const [followed, setFollowed] = useState(false);
+  const [adIndex, setAdIndex] = useState(0);
+
   useEffect(() => {
     setFollowed(currentUser.followings.includes(user?._id));
   }, [currentUser, user]);
+
   useEffect(() => {
     const getFriends = async () => {
       try {
         const friendList = await axios.get("/users/friends/" + user?._id);
         setFriends(friendList.data);
-        console.log(friends);
       } catch (error) {
         console.log(error);
       }
     };
+    const interval = setInterval(() => {
+      setAdIndex((prevIndex) => (prevIndex + 1) % ads.length);
+    }, 4000);
+
     getFriends();
+
+    return () => clearInterval(interval);
   }, [user]);
 
   const handleFollowClick = async () => {
@@ -46,6 +55,7 @@ export default function Rightbar({ user }) {
     }
     setFollowed(!followed);
   };
+
   const HomeRightbar = () => {
     return (
       <>
@@ -56,10 +66,17 @@ export default function Rightbar({ user }) {
             alt=""
           />
           <span className="birthdayText">
-            <b>Pola Foster</b> and <b>3 other friends</b> have a bithday Today.
+            <b>Pola Foster</b> and <b>3 other friends</b> have a birthday today.
           </span>
         </div>
-        <img className="rightbarAd" src={`${PublicFolder}ad.jpeg`} alt="" />
+        <div className="rightbarAdDiv">
+          <img
+            className="rightbarAd"
+            src={`${PublicFolder + ads[adIndex].photo}`}
+            alt=""
+          />
+        </div>
+
         <h4 className="rightbarTitle">Online Friends</h4>
         <ul className="rightbarFriendList">
           {onlineFriends.map((user) => {
@@ -132,6 +149,7 @@ export default function Rightbar({ user }) {
       </>
     );
   };
+
   return (
     <div className="rightbar">
       <div className="rightbarWrapper"></div>
