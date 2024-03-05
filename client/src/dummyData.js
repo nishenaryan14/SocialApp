@@ -51,6 +51,12 @@ export const Users = [
   },
 ];
 
+export const ads = [
+  { id: 1, desc: "Blue Bulls gives u Winggss", photo: "blueBulls.png" },
+  { id: 2, desc: "Wanna Latte", photo: "ad.jpeg" },
+  { id: 3, desc: "MacDowells tastes Best!", photo: "burger.jpg" },
+];
+
 export const Posts = [
   {
     id: 1,
