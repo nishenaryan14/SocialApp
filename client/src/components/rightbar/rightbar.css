@@ -17,11 +17,17 @@
   font-weight: 300;
   font-size: 15px;
 }
-
-.rightbarAd {
+.rightbarAdDiv {
+  height: 350px;
   width: 100%;
+  overflow: hidden;
+  object-fit: cover;
   border-radius: 10px;
   margin: 30px 0;
+}
+.rightbarAd {
+  height: 100%;
+  width: 100%;
 }
 
 .rightbarTitle {
